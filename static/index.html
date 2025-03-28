@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching Game</title>
+    <script src="https://unpkg.com/htmx.org"></script>
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .tile {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .tile img {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+        .tile.matched {
+            background-color: #d4edda;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <img src="http://localhost:8080/static/img/Artboard 1.svg" alt="Default Tile Image" style="display: block;">
+    <div class="grid">
+        <div class="tile" id="tile-1" hx-get="/api/tile-content?id=1" hx-swap="innerHTML"></div>
+        <div class="tile" id="tile-2" hx-get="/api/tile-content?id=2" hx-swap="innerHTML"></div>
+        <div class="tile" id="tile-3" hx-get="/api/tile-content?id=3" hx-swap="innerHTML"></div>
+        <div class="tile" id="tile-4" hx-get="/api/tile-content?id=4" hx-swap="innerHTML"></div>
+        <div class="tile" id="tile-5" hx-get="/api/tile-content?id=5" hx-swap="innerHTML"></div>
+        <div class="tile" id="tile-6" hx-get="/api/tile-content?id=6" hx-swap="innerHTML"></div>
+        <div class="tile" id="tile-7" hx-get="/api/tile-content?id=7" hx-swap="innerHTML"></div>
+        <div class="tile" id="tile-8" hx-get="/api/tile-content?id=8" hx-swap="innerHTML"></div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tiles = document.querySelectorAll('.tile');
+        tiles.forEach(tile => {
+            tile.innerHTML = `<img src="static/img/Artboard 1.svg" alt="Default Tile Image" style="display: block;">`;
+        });
+    });
+
+    document.addEventListener('htmx:afterSwap', (event) => {
+        const tile = event.target;
+        if (tile.classList.contains('tile')) {
+            tile.innerHTML = event.detail.xhr.responseText; // Use the server's response
+        }
+    });
+
+    let firstTile = null;
+    let secondTile = null;
+
+    document.addEventListener('click', (event) => {
+        const tile = event.target.closest('.tile');
+        if (!tile || tile.classList.contains('matched')) {
+            return;
+        }
+
+        if (!firstTile) {
+            firstTile = tile;
+        } else if (firstTile !== tile) {
+            secondTile = tile;
+
+            const firstImg = firstTile.querySelector('img');
+            const secondImg = secondTile.querySelector('img');
+
+            if (firstImg && secondImg && firstImg.src === secondImg.src) {
+                firstTile.classList.add('matched');
+                secondTile.classList.add('matched');
+            } else {
+                setTimeout(() => {
+                    if (firstImg) firstImg.style.display = 'none';
+                    if (secondImg) secondImg.style.display = 'none';
+                }, 1000);
+            }
+
+            firstTile = null;
+            secondTile = null;
+        }
+    });
+</script>
+
+</body>
+</html>
