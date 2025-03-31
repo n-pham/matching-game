@@ -7,17 +7,15 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
-	"time"
 )
 
 var tiles [8]string
+var IMG_DIR string = "static/img"
+var selectedIndex int
 
 func init() {
-	// Seed the random number generator
-	rand.Seed(time.Now().UnixNano())
-
 	// Read the list of images from the static/img directory
-	files, err := filepath.Glob("static/img/*.svg")
+	files, err := filepath.Glob(IMG_DIR + "/A*.svg")
 	if err != nil {
 		log.Fatalf("Failed to read images from static/img directory: %v", err)
 	}
@@ -29,12 +27,11 @@ func init() {
 	if len(files) < 4 {
 		log.Fatalf("Not enough images in static/img directory")
 	}
-	selectedImages := files[:4]
 
 	// Assign each image to two random positions in the tiles array
 	assigned := make(map[int]bool)
-	for _, img := range selectedImages {
-		for i := 0; i < 2; i++ {
+	for _, img := range files[:4] {
+		for range 2 {
 			for {
 				pos := rand.Intn(len(tiles))
 				if !assigned[pos] {
@@ -47,16 +44,10 @@ func init() {
 	}
 }
 
-func tileContentHandler(w http.ResponseWriter, r *http.Request) {
-	// Get the id parameter from the query
+func tileClickHandler(w http.ResponseWriter, r *http.Request) {
+	//
 	id := r.URL.Query().Get("id")
-	if id == "" {
-		http.Error(w, "Missing id parameter", http.StatusBadRequest)
-		log.Printf("Error: Missing id parameter")
-		return
-	}
-
-	// Convert id to integer
+	log.Print(id)
 	index, err := strconv.Atoi(id)
 	if err != nil || index < 0 || index >= len(tiles) {
 		http.Error(w, "Invalid id parameter", http.StatusBadRequest)
@@ -64,11 +55,21 @@ func tileContentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the image URL for the given id
-	imageURL := tiles[index-1]
+	var response string
+	if selectedIndex == -1 {
+		w.Header().Set("HX-Trigger", fmt.Sprintf(`update%d`, index))
+		response = fmt.Sprintf(`<img src="%s" alt="IMG">`, tiles[index])
+		selectedIndex = index
+	} else if index != selectedIndex {
+		w.Header().Set("HX-Trigger", fmt.Sprintf(`update%d,update%d`, index, selectedIndex))
+		if tiles[index] == tiles[selectedIndex] {
+			response = fmt.Sprintf(`<img src="%s" alt="IMG">`, tiles[index])
+		} else {
+			response = fmt.Sprintf(`<img src="%s" alt="IMG">`, "static/img/question-mark.svg")
+		}
+		selectedIndex = -1
+	}
 
-	// Return the image URL as JSON
-	response := fmt.Sprintf(`<img src="%s" alt="Default Tile Image" style="display: block;">`, imageURL)
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(response))
@@ -80,17 +81,16 @@ func tileContentHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Serve the index.html file at the root
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/index.html")
+		http.ServeFile(w, r, "static/test.html")
 	})
 	// Serve image files from the static/img directory
 	http.Handle("/static/img/", http.StripPrefix("/static/img/", http.FileServer(http.Dir("static/img"))))
 
 	// API endpoint for tile content
-	http.HandleFunc("/api/tile-content", tileContentHandler)
-
+	http.HandleFunc("/api/tile-content", tileClickHandler)
 	// Start the server
 	log.Println("Starting server on :8080")
-	log.Println("Tiles:", tiles)
+	log.Println("tiles:", tiles)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

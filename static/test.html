@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <title>Matching Game</title>
+        <script src="https://unpkg.com/htmx.org"></script>
+        <style>
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+            .tile {
+                width: 200px;
+                height: 200px;
+            }
+            img {
+                pointer-events: none;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="grid">
+        <div class="tile" id="tile1" hx-get="/api/tile-content?id=1" hx-trigger="click" hx-swap="innerHTML">
+            <img src="static/img/question-mark.svg" alt="IMG">
+        </div>
+        <div class="tile" id="tile2" hx-get="/api/tile-content?id=2" hx-trigger="click" hx-swap="innerHTML">
+            <img src="static/img/question-mark.svg" alt="IMG">
+        </div>
+        <div class="tile" id="tile3" hx-get="/api/tile-content?id=3" hx-trigger="click" hx-swap="innerHTML">
+            <img src="static/img/question-mark.svg" alt="IMG">
+        </div>
+        <div class="tile" id="tile4" hx-get="/api/tile-content?id=4" hx-trigger="click" hx-swap="innerHTML">
+            <img src="static/img/question-mark.svg" alt="IMG">
+        </div>
+        <div class="tile" id="tile5" hx-get="/api/tile-content?id=5" hx-trigger="click" hx-swap="innerHTML">
+            <img src="static/img/question-mark.svg" alt="IMG">
+        </div>
+        <div class="tile" id="tile6" hx-get="/api/tile-content?id=6" hx-trigger="click" hx-swap="innerHTML">
+            <img src="static/img/question-mark.svg" alt="IMG">
+        </div>
+        <div class="tile" id="tile7" hx-get="/api/tile-content?id=7" hx-trigger="click" hx-swap="innerHTML">
+            <img src="static/img/question-mark.svg" alt="IMG">
+        </div>
+        <div class="tile" id="tile0" hx-get="/api/tile-content?id=0" hx-trigger="click" hx-swap="innerHTML">
+            <img src="static/img/question-mark.svg" alt="IMG">
+        </div>
+    </div>
+    </body>
+</html>
