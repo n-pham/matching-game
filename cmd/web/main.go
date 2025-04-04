@@ -9,9 +9,10 @@ import (
 	"strconv"
 )
 
+var TILE_CNT int = 12
 var IMG_DIR string = "static/img"
-var tiles [8]string
-var found [8]bool
+var tiles []string
+var found []bool
 var previousIndex int = -1
 
 func initializeGame() {
@@ -24,25 +25,26 @@ func initializeGame() {
 	// Shuffle the list of images
 	rand.Shuffle(len(files), func(i, j int) { files[i], files[j] = files[j], files[i] })
 
-	// Pick the first 4 images
-	if len(files) < 4 {
+	// Pick the first images
+	if len(files) < TILE_CNT/2 {
 		log.Fatalf("Not enough images in static/img directory")
 	}
 
+	tiles = make([]string, TILE_CNT)
 	// Assign each image to two random positions in the tiles array
-	assigned := make(map[int]bool)
-	for _, img := range files[:4] {
-		for range [2]int{} {
+	for i := range TILE_CNT / 2 {
+		for range 2 {
 			for {
-				pos := rand.Intn(len(tiles))
-				if !assigned[pos] {
-					tiles[pos] = img
-					assigned[pos] = true
+				pos := rand.Intn(TILE_CNT)
+				if tiles[pos] == "" {
+					tiles[pos] = files[i]
 					break
 				}
 			}
 		}
 	}
+
+	found = make([]bool, TILE_CNT)
 	log.Println("Tiles:", tiles)
 }
 
@@ -62,7 +64,7 @@ func tileClickHandler(w http.ResponseWriter, r *http.Request) {
 	var response string
 	if previousIndex == -1 {
 		response = ""
-		for i := range 8 {
+		for i := range len(tiles) {
 			response += fmt.Sprintf(`<div class="tile" id="tile%d" hx-get="/api/tile-content?id=%d" hx-trigger="click" hx-swap="innerHTML">`, i, i)
 			if found[i] || i == index {
 				response += fmt.Sprintf(`<img src="%s" alt="IMG">`, tiles[i])
@@ -72,13 +74,15 @@ func tileClickHandler(w http.ResponseWriter, r *http.Request) {
 			response += `</div>`
 		}
 		previousIndex = index
-	} else if index != previousIndex {
-		if tiles[index] == tiles[previousIndex] {
-			found[index] = true
-			found[previousIndex] = true
+	} else {
+		if index != previousIndex {
+			if tiles[index] == tiles[previousIndex] {
+				found[index] = true
+				found[previousIndex] = true
+			}
 		}
 		response = ""
-		for i := range 8 {
+		for i := range len(tiles) {
 			response += fmt.Sprintf(`<div class="tile" id="tile%d" hx-get="/api/tile-content?id=%d" hx-trigger="click" hx-swap="innerHTML">`, i, i)
 			if found[i] || i == index || i == previousIndex {
 				response += fmt.Sprintf(`<img src="%s" alt="IMG">`, tiles[i])
@@ -100,11 +104,10 @@ func tileClickHandler(w http.ResponseWriter, r *http.Request) {
 
 func resetHandler(w http.ResponseWriter, r *http.Request) {
 	initializeGame()
-	found = [8]bool{false, false, false, false, false, false, false, false}
 	previousIndex = -1
 	var response string
 	w.Header().Set("HX-Target", "updateTiles")
-	for i := range 8 {
+	for i := range TILE_CNT {
 		response += fmt.Sprintf(`<div class="tile" id="tile%d" hx-get="/api/tile-content?id=%d" hx-trigger="click" hx-swap="innerHTML">`, i, i)
 		response += `<img src="static/img/question-mark.svg" alt="IMG">`
 		response += `</div>`
