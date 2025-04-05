@@ -2,6 +2,12 @@
     <head>
         <title>Matching Game</title>
         <script src="https://unpkg.com/htmx.org"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Trigger an HTMX request to /api/reset
+                htmx.ajax('GET', '/api/reset', { target: '.grid' });
+            });
+        </script>
         <style>
             .grid {
                 display: grid;
@@ -15,52 +21,23 @@
             img {
                 width: 100%;
                 height: 100%;
-                object-fit: cover;
+                object-fit: contain;
                 pointer-events: none;
+            }
+            .new-game-button {
+                padding: 10px 20px;
+                font-size: 16px;
+                text-align: center;
+                margin-top: 20px;
+                display: block; /* Center the button horizontally */
+                margin-left: auto;
+                margin-right: auto;
             }
         </style>
     </head>
     <body>
     <div class="grid" hx-target=".grid">
-        <div class="tile" id="tile0" hx-get="/api/tile-content?id=0" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile1" hx-get="/api/tile-content?id=1" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile2" hx-get="/api/tile-content?id=2" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile3" hx-get="/api/tile-content?id=3" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile4" hx-get="/api/tile-content?id=4" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile5" hx-get="/api/tile-content?id=5" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile6" hx-get="/api/tile-content?id=6" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile7" hx-get="/api/tile-content?id=7" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile8" hx-get="/api/tile-content?id=8" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile9" hx-get="/api/tile-content?id=9" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile10" hx-get="/api/tile-content?id=10" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
-        <div class="tile" id="tile11" hx-get="/api/tile-content?id=11" hx-trigger="click" hx-swap="innerHTML">
-            <img src="static/img/question-mark.svg" alt="IMG">
-        </div>
     </div>
-    <div style="text-align: center; margin-top: 20px;">
-        <button hx-get="/api/reset" hx-target=".grid" style="padding: 10px 20px; font-size: 16px;">New Game</button>
-    </div>
+    <button class="new-game-button" hx-get="/api/reset" hx-target=".grid">New Game</button>
     </body>
 </html>
